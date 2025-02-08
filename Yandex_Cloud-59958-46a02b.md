@@ -1,62 +1,78 @@
 # Virtual Machines (Compute Cloud) https://cloud.yandex.ru/docs/free-trial/
 
-Создание виртуальной машины:
-https://cloud.yandex.ru/docs/compute/quickstart/quick-create-linux
+Создал виртуальную машину:
+https://console.yandex.cloud/folders/b1gk4o29jc5t2q4s916o/compute/instance/epdpd5ggdaumtu4f4te3/overview
 
-name vm: otus-db-pg-vm-1
+С именем: otus-db-pg-vm-1
 
-Создать сеть:
-Каталог: default
-Имя: otus-vm-db-pg-net-1
+Создал подсеть: 
+Имя: default-ru-central1-b
+Зона: ru-central1-b
 
-Доступ
-username: otus
+Добавил пользователя: otus
 
-настройка OpenSSH в Windows
-Параметры -> Система -> Дополнительные компоненты -> клиент Open SSH (добавить)
-Службы (Service) -> OpenSSH SSH Server (запустить)
+Для подключения через командную строку в Windows создал ssh ключ c:\ssh\otus_pgvm.pub
 
-
-Сгенерировать ssh-key:
+Сгенерировал командой ssh-keygen:
 ```bash
 ssh-keygen -t rsa -b 2048
-name ssh-key: yc_key
-chmod 600 ~/.ssh/yc_key.pub
-ls -lh ~/.ssh/
-cat ~/.ssh/yc_key.pub # в Windows C:\Users\<имя_пользователя>\.ssh\yc_key.pub
+#Generating public/private rsa key pair.
+#Enter file in which to save the key (C:\Users\sh-al/.ssh/id_rsa): c:\ssh\otus_pgvm
 ```
-Подключение к VM:
-https://cloud.yandex.ru/docs/compute/operations/vm-connect/ssh
+Добавил сгенерированный ключ в ВМ.
+
+Подключился к ВМ в командной строке:
 
 ```bash
-ssh -i ~/yc_key otus@130.193.45.81 # в Windows ssh -i <путь_к_ключу/имя_файла_ключа> <имя_пользователя>@<публичный_IP-адрес_виртуальной_машины>
+ssh -i c:\ssh\otus_pgvm otus@158.160.17.212
+```
 
-Установка Postgres:
+Запустил установку PostgreSQL && other из скрипта:
+```bash
 sudo apt update && sudo apt upgrade -y && sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && sudo apt-get update && sudo apt-get -y install postgresql && sudo apt install unzip && sudo apt -y install mc
+```
 
-pg_lsclusters
-
-Установить пароль для Postgres:
+После установки подключился к PostgreSQL командой:
+```bash
 sudo -u postgres psql
-\password   #12345
-\q
+```
 
-Добавить сетевые правила для подключения к Postgres:
-cd /etc/postgresql/17/main/
-sudo nano /etc/postgresql/17/main/postgresql.conf
+Установил пароль для PostgreSQL:
+```bash
+\password
+#12345
+```
+
+После установки PostgreSQL добавил настройки сетевых правил для подключения к PostgreSQL:
+```bash
+sudo nano /etc/postgresql/13/main/postgresql.conf
+```
+
+Добавил в конфиг:
+
 #listen_addresses = 'localhost'
+
 listen_addresses = '*'
 
-sudo nano /etc/postgresql/17/main/pg_hba.conf
+После этого прописал правила для хоста при подключении к PostgreSQL:
+```bash
+sudo nano /etc/postgresql/13/main/pg_hba.conf
+```
+
+Добавил в конфиг:
+
 #host    all             all             127.0.0.1/32            scram-sha-256 password
+
 host    all             all             0.0.0.0/0               scram-sha-256 
 
-sudo pg_ctlcluster 17 main restart
-
-Подключение к Postgres:
-psql -h 130.193.45.81 -U postgres
-
-\l
-
-
+Перезапустил PostgreSQL:
+```bash
+sudo systemctl restart postgresql
 ```
+
+Подключился к экземпляру PostgreSQL:
+```bash
+psql -h 158.160.17.212 -U postgres
+```
+
+
