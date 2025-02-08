@@ -67,14 +67,62 @@ commit;
 (3 строк)
 ```
 
-завершите транзакцию во второй сессии
-начать новые но уже repeatable read транзации - set transaction isolation level repeatable read;
-в первой сессии добавить новую запись insert into persons(first_name, second_name) values('sveta', 'svetova');
-сделать select* from persons во второй сессии*
-видите ли вы новую запись и если да то почему?
-завершить первую транзакцию - commit;
-сделать select from persons во второй сессии
-видите ли вы новую запись и если да то почему?
-завершить вторую транзакцию
-сделать select * from persons во второй сессии
-видите ли вы новую запись и если да то почему?
+Начал новые сессии, запустил в каждой запрос:
+```sql
+set transaction isolation level repeatable read;
+```
+
+Результат запроса:
+```sql
+ transaction_isolation
+-----------------------
+ repeatable read
+(1 строка)
+```
+
+В первой сессии добавил новую запись:
+```sql
+insert into persons(first_name, second_name) values('sveta', 'svetova');
+```
+
+Результат SELECT во второй сессии не содержит новую запись:
+```sql
+ id | first_name | second_name
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+  3 | sergey     | sergeev
+(3 строк)
+```
+
+Завершил первую транзакцию выражением COMMIT:
+```sql
+commit;
+```
+
+Теперь результат содержит новую запись, так как мы завершили транзакцию в первой сессии и запись стала видна во второй:
+```sql
+ id | first_name | second_name
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+  3 | sergey     | sergeev
+  4 | sveta      | svetova
+(4 строк)
+```
+
+Завершил вторую транзакцию выражением COMMIT:
+```sql
+commit;
+```
+
+Результат тоже содержит новую запись, так как мы завершили транзакцию в первой сессии и запись видна во второй сессии:
+```sql
+ id | first_name | second_name
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+  3 | sergey     | sergeev
+  4 | sveta      | svetova
+(4 строк)
+```
