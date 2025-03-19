@@ -23,8 +23,8 @@ done in 4.17 s (drop tables 1.11 s, create tables 0.45 s, client-side generate 0
 
 Запустил тест:
 ```sql
-alex@alex-debian:~$ pgbench -h 192.168.31.56 -p 5433 -c8 -P 6 -T 60 -U postgres otus
-Password:
+pgbench -h 192.168.31.56 -p 5433 -c8 -P 6 -T 60 -U postgres otus
+
 starting vacuum...end.
 progress: 6.0 s, 15.7 tps, lat 455.003 ms stddev 193.546
 progress: 12.0 s, 11.2 tps, lat 722.612 ms stddev 438.122
@@ -89,17 +89,21 @@ tps = 15.229125 (excluding connections establishing)
 INSERT INTO otus_table (id,client)
 SELECT g.id, 'Maumussx'
 FROM generate_series(1, 20000000) AS g (id) ;
-INSERT 0 20000000
 ```
 
 Посмотрим её размер:
 
 ```sql
 select pg_total_relation_size('otus_table');
+```
+```sql
 -[ RECORD 1 ]----------+----------
 pg_total_relation_size | 885899264
-
+```
+```sql
 select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
 -[ RECORD 1 ]--+-------
 pg_size_pretty | 845 MB
 ```
@@ -113,13 +117,14 @@ pg_size_pretty | 845 MB
 
 ```sql
 update otus_table set client = replace(client,'M','H');
-UPDATE 20000000
 ```
 
 Проверяем размер:
 
 ```sql
 select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
 -[ RECORD 1 ]--+--------
 pg_size_pretty | 1690 MB
 ```
@@ -129,6 +134,8 @@ pg_size_pretty | 1690 MB
 ```sql
 SELECT relname, n_live_tup, n_dead_tup, trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
 FROM pg_stat_user_TABLEs WHERE relname = 'otus_table';
+```
+```sql
 -[ RECORD 1 ]---+------------------------------
 relname         | otus_table
 n_live_tup      | 20000000
@@ -142,6 +149,8 @@ last_autovacuum | 2025-03-17 19:41:25.846241+03
 ```sql
 SELECT relname, n_live_tup, n_dead_tup, trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
 FROM pg_stat_user_TABLEs WHERE relname = 'otus_table';
+```
+```sql
 -[ RECORD 1 ]---+------------------------------
 relname         | otus_table
 n_live_tup      | 19983456
@@ -152,6 +161,8 @@ last_autovacuum | 2025-03-17 19:55:08.045589+03
 
 ```sql
 select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
 -[ RECORD 1 ]--+--------
 pg_size_pretty | 4342 MB
 ```
@@ -183,6 +194,8 @@ ALTER TABLE otus_table SET (autovacuum_enabled = off);
 ```sql
 SELECT relname, n_live_tup, n_dead_tup, trunc(100*n_dead_tup/(n_live_tup+1))::float "ratio%", last_autovacuum
 FROM pg_stat_user_TABLEs WHERE relname = 'otus_table';
+```
+```sql
 -[ RECORD 1 ]---+------------------------------
 relname         | otus_table
 n_live_tup      | 19983456
@@ -193,12 +206,16 @@ last_autovacuum | 2025-03-17 20:05:56.843747+03
 
 ```sql
 SELECT pg_relation_filepath('otus_table');
+```
+```sql
  -[ RECORD 1 ]--------+-----------------
 pg_relation_filepath | base/16384/16387
 ```
 
 ```sql
 select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
  -[ RECORD 1 ]--+--------
 pg_size_pretty | 5875 MB
 ```
@@ -224,6 +241,8 @@ last_autovacuum | 2025-03-17 20:05:56.843747+03
 
 ```sql
 select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
  -[ RECORD 1 ]--+-------
 pg_size_pretty | 766 MB
 ```
@@ -232,15 +251,20 @@ pg_size_pretty | 766 MB
 
 ```sql
 ALTER TABLE student SET (autovacuum_enabled = on);
-
+```
+```sql
 -[ RECORD 1 ]---+------------------------------
 relname         | otus_table
 n_live_tup      | 20000034
 n_dead_tup      | 0
 ratio%          | 0
 last_autovacuum | 2025-03-18 23:04:55.788039+03
-
-select pg_size_pretty( pg_total_relation_size('otus_table'));            -[ RECORD 1 ]--+-------
+```
+```sql
+select pg_size_pretty( pg_total_relation_size('otus_table'));
+```
+```sql
+-[ RECORD 1 ]--+-------
 pg_size_pretty | 766 MB
 ```
 
