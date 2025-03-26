@@ -12,11 +12,12 @@ EXPLAIN
 SELECT * FROM products
     WHERE product_id = 1;
 ```
-
+```
 Gather  (cost=1000.00..6789.67 rows=5 width=14)
   Workers Planned: 2
   ->  Parallel Seq Scan on products  (cost=0.00..5789.17 rows=2 width=14)
         Filter: (product_id = 1)
+```
 
 ```postgresql
 EXPLAIN
@@ -24,11 +25,12 @@ SELECT * FROM products
     WHERE product_id < 100;
 ```
 
+```
 Gather  (cost=1000.00..6837.77 rows=486 width=14)
   Workers Planned: 2
   ->  Parallel Seq Scan on products  (cost=0.00..5789.17 rows=202 width=14)
         Filter: (product_id < 100)
-        
+```
 
 
 ***
@@ -51,10 +53,12 @@ SELECT * FROM products
     WHERE product_id = 1;
 ```
 
+```
 Bitmap Heap Scan on products  (cost=4.46..23.93 rows=5 width=14)
   Recheck Cond: (product_id = 1)
   ->  Bitmap Index Scan on idx_products_product_id  (cost=0.00..4.46 rows=5 width=0)
         Index Cond: (product_id = 1)
+```
 
 ```postgresql
 EXPLAIN
@@ -62,10 +66,12 @@ SELECT * FROM products
     WHERE product_id < 100;
 ```
 
+```
 Bitmap Heap Scan on products  (cost=8.41..1369.06 rows=515 width=14)
   Recheck Cond: (product_id < 100)
   ->  Bitmap Index Scan on idx_products_product_id  (cost=0.00..8.29 rows=515 width=0)
         Index Cond: (product_id < 100)
+```
 
 В результате плана выполнения запросов видим, что индекс работает, используется Bitmap Index Scan.
 
@@ -94,14 +100,16 @@ CREATE INDEX
 ```
 
 Выполнили для неё EXPLAIN:
-
+```sql
 EXPLAIN
 SELECT * FROM documents
     WHERE to_tsvector('english', contents) @@ 'node';
+```
 
-
+```
 Seq Scan on documents  (cost=0.00..6.51 rows=1 width=210)
   Filter: (to_tsvector('english'::regconfig, contents) @@ '''node'''::tsquery)
+```
 
 В результате плана выполнения запроса видим, что используется последовательное сканирование таблицы. Индекс не используется из-за малого числа строк в таблице. 
 Выключили принудительно Seq Scan:
@@ -112,10 +120,12 @@ SET enable_seqscan = OFF;
 
 Запускаем EXPLAIN:
 
+```
 Bitmap Heap Scan on documents  (cost=8.54..12.80 rows=1 width=210)
   Recheck Cond: (to_tsvector('english'::regconfig, contents) @@ '''node'''::tsquery)
   ->  Bitmap Index Scan on idx_documents_contents  (cost=0.00..8.54 rows=1 width=0)
         Index Cond: (to_tsvector('english'::regconfig, contents) @@ '''node'''::tsquery)
+```
 
 Всё, индекс работает, используется Bitmap Index Scan.
 
@@ -141,10 +151,12 @@ SELECT * FROM cities
     WHERE SUBSTRING(code, 1, 3) = '250';
 ```
 
+```
 Gather  (cost=1000.00..14197.67 rows=5000 width=16)
   Workers Planned: 2
   ->  Parallel Seq Scan on cities  (cost=0.00..12697.67 rows=2083 width=16)
         Filter: ("substring"((code)::text, 1, 3) = '250'::text)
+```
 
 Как видим, индекс не используется. Идёт Parallel Seq Scan
 
@@ -158,10 +170,12 @@ CREATE INDEX
 
 Выполнили EXPLAIN:
 
+```
 Bitmap Heap Scan on cities  (cost=59.17..5665.65 rows=5000 width=16)
   Recheck Cond: ("substring"((code)::text, 1, 3) = '250'::text)
   ->  Bitmap Index Scan on func_idx_cities_region  (cost=0.00..57.92 rows=5000 width=0)
         Index Cond: ("substring"((code)::text, 1, 3) = '250'::text)
+```
 
 Всё, индекс работает, используется Bitmap Heap Scan.
 Попробуем выключим Bitmap Index Scan и запустим EXPLAIN
@@ -172,8 +186,10 @@ SET enable_bitmapscan = off;
 
 Запрос в итоге также использует индекс, но подругому через полное его сканирование:
 
+```
 Index Scan using func_idx_cities_region on cities  (cost=0.42..13783.92 rows=5000 width=16)
   Index Cond: ("substring"((code)::text, 1, 3) = '250'::text)
+```
 
 А если выключим и Index Scan:
 
@@ -183,11 +199,12 @@ SET enable_indexscan = off;
 
 Тогда получим тот же план выполнения, что и без использования индекса:
 
+```
 Gather  (cost=1000.00..14197.67 rows=5000 width=16)
   Workers Planned: 2
   ->  Parallel Seq Scan on cities  (cost=0.00..12697.67 rows=2083 width=16)
         Filter: ("substring"((code)::text, 1, 3) = '250'::text)
-
+```
 
 ***
 ## 5. Создать индекс на несколько полей 
@@ -202,10 +219,12 @@ drop index idx_products_product_id ;
 
 Запустил EXPLAIN:
 
+```
 Gather  (cost=1000.00..7327.30 rows=173 width=14)
   Workers Planned: 2
   ->  Parallel Seq Scan on products  (cost=0.00..6310.00 rows=72 width=14)
         Filter: ((product_id <= 3344) AND (brand = 'r'::bpchar))
+```
 
 Индекс не используется, т.к. его нет. Оптимизатор выполяет параллельное сканирование таблицы Parallel Seq Scan.
 Создадим индекс по двум полям brand, product_id:
@@ -218,10 +237,12 @@ CREATE INDEX
 
 Запустил EXPLAIN:
 
+```
 Bitmap Heap Scan on products  (cost=6.20..568.00 rows=173 width=14)
   Recheck Cond: ((brand = 'r'::bpchar) AND (product_id <= 3344))
   ->  Bitmap Index Scan on idx_products_brand_product_id  (cost=0.00..6.15 rows=173 width=0)
         Index Cond: ((brand = 'r'::bpchar) AND (product_id <= 3344))
+```
 
 Всё, индекс работает, используется Bitmap Index Scan.
 
