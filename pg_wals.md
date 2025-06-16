@@ -97,7 +97,7 @@ tps = 96.122482 (excluding connections establishing)
 
 ## Создайте новый кластер с включенной контрольной суммой страниц. Создайте таблицу. Вставьте несколько значений. Выключите кластер. Измените пару байт в таблице. Включите кластер и сделайте выборку из таблицы
 
-# Создайю новый кластер
+# создаю новый кластер
 ```
 alex@alex-debian:~$ sudo pg_createcluster 16 checksum -- --data-checksum
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum start
@@ -106,7 +106,7 @@ Ver Cluster  Port Status Owner    Data directory                  Log file
 16  checksum 5433 online postgres /var/lib/postgresql/16/checksum /var/log/postgresql/postgresql-16-checksum.log
 16  main     5432 online postgres /var/lib/postgresql/16/main     /var/log/postgresql/postgresql-16-main.log
 ```
-# Создал таблицу и вставил несколько значений
+# создал таблицу и вставил несколько значений
 ```
 postgres=# create table test(i int);
 CREATE TABLE
@@ -118,7 +118,7 @@ postgres=# SELECT pg_relation_filepath('test');
 (1 row)
 ```
 
-# Выключил кластер
+# выключил кластер
 ```
 postgres=# \q
 postgres@alex-debian:~$ exit
@@ -126,7 +126,7 @@ logout
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum stop
 ```
 
-# Изменил пару байт и стартую кластер
+# изменил пару байт и стартую кластер
 ```
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum start
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum status
@@ -138,13 +138,13 @@ Ver Cluster  Port Status Owner    Data directory                  Log file
 16  main     5432 online postgres /var/lib/postgresql/16/main     /var/log/postgresql/postgresql-16-main.log
 ```
 
-# Делаю выборку из таблицы
+# делаю выборку из таблицы
 ```
 postgres=# select * from test;
 WARNING:  page verification failed, calculated checksum 31737 but expected 10262
 ERROR:  invalid page in block 0 of relation base/5/16384
 ```
-# Ошибка, проверяю данные
+# ошибка, проверяю данные
 ```
 alex@alex-debian:~$ sudo /usr/lib/postgresql/16/bin/pg_checksums -D /var/lib/postgresql/16/checksum
 pg_checksums: error: cluster must be shut down
@@ -158,7 +158,7 @@ Bad checksums:  1
 Data checksum version: 1
 ```
 
-# Отключил checksum и start
+# отключил checksum и start
 ```
 alex@alex-debian:~$ sudo /usr/lib/postgresql/16/bin/pg_checksums -d -D /var/lib/postgresql/16/checksum
 pg_checksums: syncing data directory
@@ -167,7 +167,7 @@ Checksums disabled in cluster
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum start
 ```
 
-# Проверяю
+# проверяю
 ```
 postgres=# select * from test;
 postgres=# select * from test limit 10;
