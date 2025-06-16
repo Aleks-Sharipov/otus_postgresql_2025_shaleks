@@ -165,6 +165,7 @@ pg_checksums: syncing data directory
 pg_checksums: updating control file
 Checksums disabled in cluster
 alex@alex-debian:~$ sudo pg_ctlcluster 16 checksum start
+```
 
 # Проверяю
 ```
