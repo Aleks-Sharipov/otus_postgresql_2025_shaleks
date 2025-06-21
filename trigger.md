@@ -146,12 +146,7 @@ BEGIN
    RETURN NEW;
 END;
 $TRIG_FUNC$
-LANGUAGE plpgsql
-VOLATILE
-SET search_path = pract_functions, public
-COST 50;
-
-CREATE FUNCTION
+LANGUAGE plpgsql;
 ```
 
 ```sql
@@ -173,12 +168,7 @@ BEGIN
     RETURN NEW;
 END;
 $TRIG_FUNC$
-LANGUAGE plpgsql
-VOLATILE
-SET search_path = pract_functions, public
-COST 50;
-
-CREATE FUNCTION
+LANGUAGE plpgsql;
 ```
 
 ```sql
@@ -208,12 +198,7 @@ BEGIN
     RETURN NEW;
 END;
 $TRIG_FUNC$
-LANGUAGE plpgsql
-VOLATILE
-SET search_path = pract_functions, public
-COST 50;
-
-CREATE FUNCTION
+LANGUAGE plpgsql;
 ```
 
 ### Создаю триггеры:
@@ -236,10 +221,6 @@ AFTER UPDATE
 ON sales
 FOR EACH ROW
 EXECUTE PROCEDURE ft_update_sales();
-
-CREATE TRIGGER
-CREATE TRIGGER
-CREATE TRIGGER
 ```
 
 ### Тестирую
