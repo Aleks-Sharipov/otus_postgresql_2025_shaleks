@@ -1,10 +1,11 @@
 
 ## Виды и устройство репликации в PostgreSQL
 
-1. Создал ВМ №3 на ЯО, otus-vm-1, otus-vm-2, otus-vm-3.
-2. Ставим на каждую ВМ postgresql
+*1. Создал ВМ №3 на ЯО, otus-vm-1, otus-vm-2, otus-vm-3.*
 
-# ВМ №1
+*2. Ставим на каждую ВМ postgresql*
+
+*ВМ №1*
 
 ```
 otus@otus-vm-1:~$ sudo apt update && sudo apt upgrade -y -q && sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && sudo apt-get update && sudo apt -y install postgresql-15
@@ -13,7 +14,7 @@ Ver Cluster Port Status Owner    Data directory              Log file
 15  main    5432 online postgres /var/lib/postgresql/15/main /var/log/postgresql/postgresql-15-main.log
 ```
 
-# ВМ №2
+*ВМ №2*
 
 ```
 otus@otus-vm-2:~$ sudo apt update && sudo apt upgrade -y -q && sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && sudo apt-get update && sudo apt -y install postgresql-15
@@ -22,7 +23,7 @@ Ver Cluster Port Status Owner    Data directory              Log file
 15  main    5432 online postgres /var/lib/postgresql/15/main /var/log/postgresql/postgresql-15-main.log
 ```
 
-# ВМ №3
+*ВМ №3*
 
 ```
 otus@otus-vm-3:~$ sudo apt update && sudo apt upgrade -y -q && sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && sudo apt-get update && sudo apt -y install postgresql-15
@@ -31,7 +32,7 @@ Ver Cluster Port Status Owner    Data directory              Log file
 15  main    5432 online postgres /var/lib/postgresql/15/main /var/log/postgresql/postgresql-15-main.log
 ```
 
-# В конфигурации ставим параметр сервера wal_level, устанавливаем logical и перезапускаем кластеры на всех. Проверяем:
+## В конфигурации ставим параметр сервера wal_level, устанавливаем logical и перезапускаем кластеры на всех. Проверяем:
 
 ```sql
 postgres=# show wal_level;
@@ -59,10 +60,9 @@ postgres=# show wal_level;
 (1 row)
 ```
 
-* Аналогично на 2 и ВМ №3
+*Аналогично на ВМ №2 и ВМ №3*
 
-
-## На ВМ №1 создаем таблицы test для записи, test2 для запросов на чтение
+# На ВМ №1 создаем таблицы test для записи, test2 для запросов на чтение
 # На всех ВМ создал по 2 таблицы test, test2 сразу
 
 *ВМ №1*
@@ -113,7 +113,7 @@ postgres=# \dt
 (2 rows)
 ```
 
-## Создаем публикацию таблицы test и подписываемся на публикацию таблицы test2 с ВМ №2
+# Создаем публикацию таблицы test и подписываемся на публикацию таблицы test2 с ВМ №2
 
 *ВМ №1*
 
@@ -143,7 +143,7 @@ Tables:
     "public.test2"
 ```
 
-## Создаём подписки. На ВМ №1 на публикацию test_pub ВМ №2. На ВМ №2 на публикацию test_pub ВМ №1. На ВМ №3 на публикацию test_pub ВМ №1 и test_pub ВМ №2.
+# Создаём подписки. На ВМ №1 на публикацию test_pub ВМ №2. На ВМ №2 на публикацию test_pub ВМ №1. На ВМ №3 на публикацию test_pub ВМ №1 и test_pub ВМ №2.
 
 *ВМ №1*
 
@@ -202,7 +202,7 @@ List of subscriptions
 ```
 
 
-## Проверяем. Bставим данные на ВМ №1 в таблицу test и данные на ВМ №2 в таблицу test2
+# Проверяем. Bставим данные на ВМ №1 в таблицу test и данные на ВМ №2 в таблицу test2
 
 *ВМ №1*
 
@@ -275,7 +275,7 @@ postgres=# select * from test2;
 (10 rows)
 ```
 
-## На ВМ №1 смотрим test2 со второй, на 2-й test с первой, на 3-й test с 1-й и test2 со 2-й
+# На ВМ №1 смотрим test2 со второй, на 2-й test с первой, на 3-й test с 1-й и test2 со 2-й
 
 *ВМ №1*
 
